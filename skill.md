@@ -1,6 +1,5 @@
 ---
 name: bd-agent
-version: 1.1.0
 description: From a campaign brief, automatically discover, score, and draft personalized Telegram outreach to relevant leads. Single-run Claude Skill — output is one Markdown report, no database, no auto-send.
 metadata: {"agent":{"emoji":"🎯","category":"bd-automation"}}
 ---
@@ -67,6 +66,14 @@ For each candidate found, extract:
 - Language and rough tone
 
 **If fewer than 10 usable candidates are found:** Return whatever is reliable, explicitly flag the low count, and suggest broader queries or ask the user to add manual leads.
+
+### Manual Lead Merging (fallback)
+
+If the user has provided manual "must-include" leads alongside the brief (in any format — name + handle + URL + notes), merge them into the discovered list:
+
+- Score them through the same rubric as auto-discovered leads.
+- Label them `[User-provided]` in the scorecard Notes column.
+- They are not treated as Tier A by default — they must earn their tier through scoring.
 
 ---
 
@@ -135,6 +142,7 @@ Build each DM with 3 parts:
 ### Hard guardrails
 - **≤ 300 characters total.** Telegram DMs longer than this have significantly lower read rates. Trim aggressively. Count every character including spaces.
 - No invented evidence. If you write "I loved your post about X" — that post must exist in what you discovered.
+- Never fabricate or estimate follower counts. Only reference numbers explicitly returned by web search. If unknown, mark as `Unknown` and score at bracket floor.
 - If signals are too thin to personalize → write the best generic draft possible and label it `[GENERIC — manual edit recommended]`.
 
 ### Tier C
@@ -201,10 +209,11 @@ Group by tier:
 | Situation | Handling |
 |---|---|
 | Too few leads (< 10) | Return what's reliable; suggest broader queries or manual additions |
-| No follower data | Use `Influence: estimated`; score conservatively at bracket floor |
+| No follower data | Assign bracket floor score (1); mark as `Influence: estimated`; never fabricate a number |
 | Conflicting data | Mark as `CONFLICT`; use lower value |
 | Language mismatch | Reduce Fit score; flag in Notes column (e.g., "EN only; campaign target is VN") |
 | DM over 300 chars | Trim until it fits — never exceed the limit |
+| All leads score Tier C (≤ 15) | Output scorecard only, no DMs. Explicitly flag: "No Tier A or B leads found — suggest broadening key_topics, relaxing hard filters, or adding manual must-include leads." |
 
 ---
 

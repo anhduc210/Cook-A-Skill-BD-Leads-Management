@@ -6,6 +6,42 @@ Format: `[version] YYYY-MM-DD — description`
 
 ---
 
+## [1.2.0] 2026-02-25
+
+### Changed — `spec.md` + `skill.md` (scoring rubric push)
+
+**spec.md — Section 3 (Business Value):**
+- Added quantified value claim: "replaces 2–3 hours of manual KOL research + drafting per campaign".
+- Added personalization lift data: "3–5× higher reply rates vs. generic templates".
+- Added breakthrough statement: "full BD pipeline in one Claude session, zero external infrastructure".
+
+**spec.md — Section 7.2 (Scoring Rubric):**
+- Added Relevance score brackets (4 levels: deep expert → no mention) to mirror skill.md.
+- Added Fit score brackets (3 levels: perfect match → mismatch) to mirror skill.md.
+- Clarified Influence `estimated` case: assign bracket floor score (1), never fabricate a follower count.
+
+**spec.md — Section 8 (Outreach Guardrails):**
+- Added explicit rule: "Never fabricate follower counts or engagement metrics — only use data returned by web search."
+
+**spec.md — Section 10 (Edge Cases):**
+- Added "All leads score Tier C" edge case: output scorecard only, flag with actionable guidance.
+- Added "Fabricated or unverifiable data" edge case: mark as Unknown, score conservatively, never invent data.
+
+**skill.md — Step 3 (Discovery):**
+- Added Manual Lead Merging section: how to handle user-provided must-include leads, [User-provided] label, scoring parity rule.
+
+**skill.md — Step 5 (DM Guardrails):**
+- Added explicit rule: "Never fabricate or estimate follower counts."
+
+**skill.md — Edge Cases table:**
+- Updated "No follower data" row to explicitly say "assign bracket floor score (1); never fabricate".
+- Added "All leads score Tier C" row with actionable output instruction.
+
+**skill.md — Frontmatter:**
+- Removed unsupported `version` field (not in Claude Skill spec: supported fields are name, description, metadata, etc.).
+
+---
+
 ## [1.1.1] 2026-02-25
 
 ### Rewritten — `skill.md`

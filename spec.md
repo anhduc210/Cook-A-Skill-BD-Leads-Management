@@ -38,10 +38,11 @@ BD Agent turns this into an automated loop: **brief → auto‑research → qual
 
 ## 3) Business Value
 
-- **Zero‑setup lead generation**: user writes a campaign brief; skill finds people to talk to.  
-- **Consistent qualification**: transparent scoring and tiers across campaigns.  
-- **Higher reply odds**: outreach grounded in what each lead actually talks about.  
-- **Reusable playbook**: the Markdown output can be used by any BD teammate.
+- **Zero‑setup lead generation**: user writes a campaign brief; skill finds people to talk to. No CRM, no VA, no custom code — a single Claude conversation replaces the entire top-of-funnel research workflow.
+- **Consistent qualification**: transparent scoring and tiers across campaigns — same rubric every time, no gut-feel drift.
+- **Higher reply odds**: personalized outreach grounded in what each lead actually talks about. Personalized cold DMs typically see 3–5× higher reply rates than generic templates.
+- **Reusable playbook**: the Markdown output can be handed to any BD teammate, used as a briefing doc, or rerun for a new campaign with a different brief.
+- **Radical time savings**: replaces 2–3 hours of manual KOL research + drafting per campaign. Full loop (discover → score → draft) runs in a single session with zero external infrastructure — no APIs, no database, no integrations required.
 
 ***
 
@@ -143,9 +144,18 @@ If any question is unanswered → stop and re‑ask; do not continue.
 
 | Dimension | Range | Basis |
 |---|---|---|
-| **Relevance** | 0–10 | Overlap between their topics and `key_topics` + ICP |
-| **Influence** | 0–10 | Follower brackets (see table below) |
-| **Fit** | 0–10 | Voice/tone alignment with `campaign_tone` + goal |
+| **Relevance** | 0–10 | Topic overlap with `key_topics` + ICP (see brackets below) |
+| **Influence** | 0–10 | Follower count or role prominence (see brackets below) |
+| **Fit** | 0–10 | Voice/tone alignment with `campaign_tone` + goal (see brackets below) |
+
+**Relevance Score Brackets:**
+
+| Signal | Score |
+|---|---|
+| Content revolves entirely around the topic; deep insights, consistent coverage | 9–10 |
+| Frequent mentions, clear sustained interest | 6–8 |
+| Occasional or passing mentions | 3–5 |
+| Little to no mention of relevant topics | 0–2 |
 
 **Influence Score Brackets:**
 
@@ -159,7 +169,15 @@ If any question is unanswered → stop and re‑ask; do not continue.
 | < 1K or Unknown | 1 |
 
 > Role prominence (e.g., confirmed VC partner, protocol co‑founder, known CT figure) → apply **+1 adjustment** to bracket score, max 10.
-> If no follower data is available, use role prominence alone and mark as `Influence: estimated`.
+> If no follower data is available and only role prominence is known → assign bracket floor score (1) and mark as `Influence: estimated`. Never fabricate or guess a follower count.
+
+**Fit Score Brackets:**
+
+| Signal | Score |
+|---|---|
+| Perfect match — language, style, and audience all align with campaign tone | 9–10 |
+| Mostly aligned — minor DM text adjustment needed | 5–8 |
+| Mismatched language or vibe — requires significant rewrite or skip | 0–4 |
 
 Tier mapping:
 
@@ -190,6 +208,7 @@ For **Tier A & B** leads:
 - Guardrails:
 
   - No invented evidence (“I loved your post about X” if no such post).
+  - Never fabricate follower counts or engagement metrics — only use data explicitly returned by web search.
   - Keep messages short (2–4 sentences). **Hard limit: ≤ 300 characters total.** Telegram DMs beyond this length have significantly lower read rates; trim aggressively if needed.
   - If signals are weak → label `[GENERIC — manual edit recommended]`.
 
@@ -236,14 +255,20 @@ Grouped by tier:
 
 ## 10) Edge Cases
 
-- **Too few leads found**  
+- **Too few leads found**
   - Return whatever number is reliable; explicitly suggest broader queries or adding manual “must‑include” leads.
 
-- **Conflicting or thin data**  
+- **Conflicting or thin data**
   - Mark follower/role info as `Unknown` or `CONFLICT` and adjust Influence score conservatively.
 
-- **Non‑matching language**  
+- **Non‑matching language**
   - If content language doesn’t match `target_languages`, reduce Fit and flag in notes (“EN only; campaign target is VN”).
+
+- **All leads score Tier C (≤15)**
+  - Do not generate any DMs. Output the scorecard and explicitly flag: “No Tier A or B leads found — suggest broadening `key_topics`, relaxing hard filters, or providing manual must-include leads.”
+
+- **Fabricated or unverifiable data**
+  - If follower count, bio, or topic signals cannot be confirmed from search results → mark as `Unknown`, do not estimate, and score conservatively. Never invent data to complete a score.
 
 ***
 
